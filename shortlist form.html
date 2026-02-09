@@ -149,7 +149,7 @@
       [...r.cells].slice(0, 3).map(c => c.firstChild.value)
     );
 
-    await fetch("http://0.0.0.0:8000/submit", {
+    await fetch("https://homies-hottest-100.onrender.com/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ rows })
