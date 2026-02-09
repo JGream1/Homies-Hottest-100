@@ -97,6 +97,9 @@
   <h1>Homie's Hottest 100</h1>
   <h2>Select up to 30 songs for the shortlist</h2>
 
+  <input id="nameInput" type="text" placeholder="Your Name" 
+      style="width: 60%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #bbb;">
+
   <button class="btn add-btn" id="addRowBtn">+ Add Row</button>
 
   <table id="dataTable">
@@ -125,6 +128,12 @@
   const addRowBtn = document.getElementById("addRowBtn");
   const submitBtn = document.getElementById("submitBtn");
 
+  // Generate or load unique device ID
+  if (!localStorage.getItem("uniqueID")) {
+    localStorage.setItem("uniqueID", crypto.randomUUID());
+  }
+  const uniqueID = localStorage.getItem("uniqueID");
+
   function addRow() {
     if (tableBody.rows.length >= maxRows) {
       alert("Max 30 songs allowed! READ THE FUCKING DESCRIPTION!!!!!!");
@@ -148,15 +157,28 @@
   addRowBtn.onclick = addRow;
 
   submitBtn.onclick = async () => {
+    const name = document.getElementById("nameInput").value.trim();
+    if (!name) {
+      alert("Please enter your name before submitting.");
+      return;
+    }
+
     const rows = [...tableBody.rows].map(r =>
       [...r.cells].slice(0, 3).map(c => c.firstChild.value)
     );
 
-    await fetch("https://homies-hottest-100.onrender.com/submit", {
+    const response = await fetch("https://homies-hottest-100.onrender.com/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rows })
+      body: JSON.stringify({ name, uniqueID, rows })
     });
+
+    const result = await response.json();
+
+    if (result.error === "already_submitted") {
+      alert("You have already submitted your shortlist.");
+      return;
+    }
 
     alert("Submitted!");
   };

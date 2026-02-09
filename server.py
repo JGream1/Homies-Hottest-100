@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import json 
+import json
+import os
 
 app = FastAPI()
 
@@ -16,20 +17,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class TableData(BaseModel): 
-    rows: list 
+class TableData(BaseModel):
+    name: str
+    uniqueID: str
+    rows: list
 
-@app.post("/submit") 
-def submit(data: TableData): 
+def load_submissions():
+    if not os.path.exists("submissions.json"):
+        return []
+    with open("submissions.json", "r") as f:
+        return [json.loads(line) for line in f]
+
+@app.post("/submit")
+def submit(data: TableData):
+    submissions = load_submissions()
+
+    for entry in submissions:
+        if entry["name"] == data.name or entry["uniqueID"] == data.uniqueID:
+            return {"error": "already_submitted"}
+
+    new_entry = {
+        "name": data.name,
+        "uniqueID": data.uniqueID,
+        "rows": data.rows
+    }
+
     with open("submissions.json", "a") as f:
-        f.write(json.dumps(data.rows) + "\n")
+        f.write(json.dumps(new_entry) + "\n")
+
     return {"status": "ok"}
 
 @app.get("/submissions")
 def get_submissions():
-    try:
-        with open("submissions.json", "r") as f:
-            lines = f.readlines()
-        return {"submissions": [json.loads(line) for line in lines]}
-    except FileNotFoundError:
-        return {"submissions": []}
+    return {"submissions": load_submissions()}
