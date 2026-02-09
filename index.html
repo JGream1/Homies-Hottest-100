@@ -138,7 +138,7 @@
 
   function addRow() {
     if (tableBody.rows.length >= maxRows) {
-      alert("Max 30 songs allowed! READ THE FUCKING DESCRIPTION!!!!!!");
+      alert("Max 30 songs allowed! READ THE DESCRIPTION YOU DAFT CUNT!!!!!!");
       return;
     }
 
@@ -161,7 +161,7 @@
   submitBtn.onclick = async () => {
     const name = document.getElementById("nameInput").value.trim();
     if (!name) {
-      alert("Please enter your name before submitting.");
+      alert("Put ya name in ya gronk");
       return;
     }
 
@@ -178,7 +178,7 @@
     const result = await response.json();
 
     if (result.error === "already_submitted") {
-      alert("You have already submitted your shortlist.");
+      alert("You have already submitted your shortlist. You cheeky bugger");
       return;
     }
 

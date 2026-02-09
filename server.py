@@ -28,6 +28,7 @@ def load_submissions():
     with open("submissions.json", "r") as f:
         return [json.loads(line) for line in f]
 
+# Submit shortlist data
 @app.post("/submit")
 def submit(data: TableData):
     submissions = load_submissions()
@@ -47,6 +48,13 @@ def submit(data: TableData):
 
     return {"status": "ok"}
 
+# Return submitted shortlist data
 @app.get("/submissions")
 def get_submissions():
     return {"submissions": load_submissions()}
+
+# Reset submissions data
+@app.post("/reset")
+def reset():
+    open("submissions.json", "w").close()
+    return {"status": "reset_complete"}
