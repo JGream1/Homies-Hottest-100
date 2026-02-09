@@ -1,0 +1,14 @@
+Individual shortlists
+In Google Forms -> Output to Google Sheets
+Song, Artist, Notes (e.g. Radio Edit, Album Version, Acoustic Version etc.)
+30 Song Limit
+Manually join each song with it's spotify link in csv
+
+2. Individual top 50s
+Create website with HTML + JS (SortableJS Library) that allows drag and drop of each song
+Python and FastAPI backend saves as csv
+
+3. Friend's Hottest 100
+Use python to anonymously aggregate songs into final list (#100 first)
+Use system where #1 gets 50 pts, #2 gets 49 etc. Final Score = Sum of Pts * log2(1 + Num of Appearances)
+Use Soundiiz (or similar) to automatically build Spotify playlist

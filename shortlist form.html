@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Homie's Hottest 100 Shortlist</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ffecd2, #fcb69f);
+      display: flex;
+      justify-content: center;
+      padding-top: 40px;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+      width: 750px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+      color: #e65100;
+      margin-bottom: 5px;
+    }
+
+    h2 {
+      color: #ff7043;
+      margin-top: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th {
+      background: #ffe0b2;
+      border: 1px solid #d7ccc8;
+      padding: 10px;
+      font-weight: bold;
+      color: #bf360c;
+    }
+
+    td {
+      border: 1px solid #e0e0e0;
+      padding: 10px;
+    }
+
+    input {
+      width: 95%;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #bbb;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 20px;
+      color: white;
+    }
+
+    .add-btn {
+      background: #43a047;
+    }
+
+    .submit-btn {
+      background: #1e88e5;
+      margin-left: 10px;
+    }
+
+    .remove-btn {
+      cursor: pointer;
+      color: #d32f2f;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .note-text {
+      margin-top: 10px;
+      color: #6d4c41;
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <h1>Homie's Hottest 100</h1>
+  <h2>Select up to 30 songs for the shortlist</h2>
+
+  <button class="btn add-btn" id="addRowBtn">+ Add Row</button>
+
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Song</th>
+        <th>Artist</th>
+        <th>Notes (Optional)</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <p class="note-text">
+    Notes column is for additional information such as Radio Edit, Acoustic Version etc.
+  </p>
+
+  <button class="btn submit-btn" id="submitBtn">Submit</button>
+
+</div>
+
+<script>
+  const maxRows = 30;
+  const tableBody = document.querySelector("#dataTable tbody");
+  const addRowBtn = document.getElementById("addRowBtn");
+  const submitBtn = document.getElementById("submitBtn");
+
+  function addRow() {
+    if (tableBody.rows.length >= maxRows) return;
+
+    const row = tableBody.insertRow();
+
+    for (let i = 0; i < 3; i++) {
+      const cell = row.insertCell();
+      const input = document.createElement("input");
+      input.type = "text";
+      cell.appendChild(input);
+    }
+
+    const removeCell = row.insertCell();
+    removeCell.innerHTML = `<span class="remove-btn">×</span>`;
+    removeCell.onclick = () => row.remove();
+  }
+
+  addRowBtn.onclick = addRow;
+
+  submitBtn.onclick = async () => {
+    const rows = [...tableBody.rows].map(r =>
+      [...r.cells].slice(0, 3).map(c => c.firstChild.value)
+    );
+
+    await fetch("http://0.0.0.0:8000/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rows })
+    });
+
+    alert("Submitted!");
+  };
+
+  addRow();
+</script>
+
+</body>
+</html>
