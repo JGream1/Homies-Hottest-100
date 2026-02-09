@@ -1,8 +1,20 @@
-from fastapi import FastAPI 
-from pydantic import BaseModel 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import json 
 
-app = FastAPI() 
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://jgream1.github.io",
+        "https://jgream1.github.io/Homies-Hottest-100"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class TableData(BaseModel): 
     rows: list 

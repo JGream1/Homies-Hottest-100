@@ -1,6 +1,7 @@
 import requests
+import json
 
 url = "https://homies-hottest-100.onrender.com/submissions"
 data = requests.get(url).json()
 
-submissions = data["submissions"]
+print(json.dumps(data, indent=2))
