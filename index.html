@@ -98,7 +98,7 @@
   <h2>Select up to 30 songs for the shortlist</h2>
 
   <input id="nameInput" type="text" placeholder="Your Name" 
-      style="width: 40%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #bbb;">
+      style="width: 30%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #bbb;">
 
   <br>
 
@@ -130,7 +130,6 @@
   const addRowBtn = document.getElementById("addRowBtn");
   const submitBtn = document.getElementById("submitBtn");
 
-  // Generate or load unique device ID
   if (!localStorage.getItem("uniqueID")) {
     localStorage.setItem("uniqueID", crypto.randomUUID());
   }
@@ -138,7 +137,7 @@
 
   function addRow() {
     if (tableBody.rows.length >= maxRows) {
-      alert("Max 30 songs allowed! READ THE DESCRIPTION YOU DAFT CUNT!!!!!!");
+      alert("Max 30 songs allowed! Are you fucking BLIND!?!?! Can thou not COUNT!?!?!");
       return;
     }
 
@@ -161,7 +160,7 @@
   submitBtn.onclick = async () => {
     const name = document.getElementById("nameInput").value.trim();
     if (!name) {
-      alert("Put ya name in ya gronk");
+      alert("Please enter your name before submitting.");
       return;
     }
 
@@ -178,7 +177,7 @@
     const result = await response.json();
 
     if (result.error === "already_submitted") {
-      alert("You have already submitted your shortlist. You cheeky bugger");
+      alert("You have already submitted your shortlist.");
       return;
     }
 
