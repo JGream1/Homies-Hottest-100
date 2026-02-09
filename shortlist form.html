@@ -126,7 +126,10 @@
   const submitBtn = document.getElementById("submitBtn");
 
   function addRow() {
-    if (tableBody.rows.length >= maxRows) return;
+    if (tableBody.rows.length >= maxRows) {
+      alert("Max 30 songs allowed! READ THE FUCKING DESCRIPTION!!!!!!");
+      return;
+    }
 
     const row = tableBody.insertRow();
 
