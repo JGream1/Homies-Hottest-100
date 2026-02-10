@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset='UTF-8'>
   <title>Homie's Hottest 100 Shortlist</title>
 
   <style>
@@ -92,19 +92,19 @@
 </head>
 
 <body>
-<div class="container">
+<div class='container'>
 
   <h1>Homie's Hottest 100</h1>
   <h2>Select up to 30 songs for the shortlist</h2>
 
-  <input id="nameInput" type="text" placeholder="Your Name" 
-      style="width: 30%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #bbb;">
+  <input id='nameInput' type='text' placeholder='Your Name' 
+      style='width: 30%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #bbb;'>
 
   <br>
 
-  <button class="btn add-btn" id="addRowBtn">+ Add Row</button>
+  <button class='btn add-btn' id='addRowBtn'>+ Add Row</button>
 
-  <table id="dataTable">
+  <table id='dataTable'>
     <thead>
       <tr>
         <th>Song</th>
@@ -116,28 +116,28 @@
     <tbody></tbody>
   </table>
 
-  <p class="note-text">
+  <p class='note-text'>
     Notes column is for additional information such as Radio Edit, Acoustic Version etc.
   </p>
 
-  <button class="btn submit-btn" id="submitBtn">Submit</button>
+  <button class='btn submit-btn' id='submitBtn'>Submit</button>
 
 </div>
 
 <script>
   const maxRows = 30;
-  const tableBody = document.querySelector("#dataTable tbody");
-  const addRowBtn = document.getElementById("addRowBtn");
-  const submitBtn = document.getElementById("submitBtn");
+  const tableBody = document.querySelector('#dataTable tbody');
+  const addRowBtn = document.getElementById('addRowBtn');
+  const submitBtn = document.getElementById('submitBtn');
 
-  if (!localStorage.getItem("uniqueID")) {
-    localStorage.setItem("uniqueID", crypto.randomUUID());
+  if (!localStorage.getItem('uniqueID')) {
+    localStorage.setItem('uniqueID', crypto.randomUUID());
   }
-  const uniqueID = localStorage.getItem("uniqueID");
+  const uniqueID = localStorage.getItem('uniqueID');
 
   function addRow() {
     if (tableBody.rows.length >= maxRows) {
-      alert("Max 30 songs allowed! Are you fucking BLIND!?!?! Can thou not COUNT!?!?!");
+      alert('Max 30 songs allowed! Are you fucking BLIND!?!?! Can thou not COUNT!?!?!');
       return;
     }
 
@@ -145,22 +145,22 @@
 
     for (let i = 0; i < 3; i++) {
       const cell = row.insertCell();
-      const input = document.createElement("input");
-      input.type = "text";
+      const input = document.createElement('input');
+      input.type = 'text';
       cell.appendChild(input);
     }
 
     const removeCell = row.insertCell();
-    removeCell.innerHTML = `<span class="remove-btn">×</span>`;
+    removeCell.innerHTML = `<span class='remove-btn'>×</span>`;
     removeCell.onclick = () => row.remove();
   }
 
   addRowBtn.onclick = addRow;
 
   submitBtn.onclick = async () => {
-    const name = document.getElementById("nameInput").value.trim();
+    const name = document.getElementById('nameInput').value.trim();
     if (!name) {
-      alert("Please enter your name before submitting.");
+      alert('Please enter your name before submitting.');
       return;
     }
 
@@ -168,20 +168,20 @@
       [...r.cells].slice(0, 3).map(c => c.firstChild.value)
     );
 
-    const response = await fetch("https://homies-hottest-100.onrender.com/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const response = await fetch('https://homies-hottest-100.onrender.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, uniqueID, rows })
     });
 
     const result = await response.json();
 
-    if (result.error === "already_submitted") {
-      alert("You have already submitted your shortlist.");
+    if (result.error === 'already_submitted') {
+      alert('You have already submitted your shortlist.');
       return;
     }
 
-    alert("Submitted!");
+    alert('Submitted!');
   };
 
   addRow();

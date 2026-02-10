@@ -2,7 +2,6 @@ import requests
 import re
 import pandas as pd
 import os
-import requests
 
 
 ##### CLEAN SONGS FROM SUBMISSIONS #####
