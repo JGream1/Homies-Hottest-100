@@ -195,7 +195,7 @@
 
     <!-- RIGHT: Full shortlist -->
     <div class="column">
-      <h3>Your Shortlist</h3>
+      <h3>Shortlist</h3>
       <div class="list-container" id="shortlist">
         <!-- Songs loaded from /cleaned_songs -->
       </div>
@@ -300,35 +300,46 @@
   }
 
   function placeCardInSlot(card, slot) {
-    // If slot already has a card, move it back to shortlist
-    const existing = slot.querySelector('.song-card');
-    if (existing) {
-      shortlistEl.appendChild(existing);
+    const index = parseInt(slot.dataset.index, 10);
+
+    // Build an array of the current 50 slots
+    const slots = Array.from(rankList.querySelectorAll('.drop-slot'));
+
+    // Find the first empty slot at or after the drop position
+    let target = index;
+    while (target < 50 && slots[target].querySelector('.song-card')) {
+      target++;
     }
 
+    // If no empty slot exists, eject the bottom song to shortlist
+    if (target >= 50) {
+      const lastSlot = slots[49];
+      const bottomCard = lastSlot.querySelector('.song-card');
+
+      if (bottomCard) {
+        lastSlot.innerHTML = '';
+        lastSlot.classList.add('empty');
+        shortlistEl.appendChild(bottomCard);
+      }
+
+      target = 49; // treat slot 50 as the empty slot
+    }
+
+    // Shift songs down from bottom to target
+    for (let i = target; i > index; i--) {
+      const above = slots[i - 1].querySelector('.song-card');
+      if (above) {
+        slots[i].innerHTML = '';
+        slots[i].classList.remove('empty');
+        slots[i].appendChild(above);
+      }
+    }
+
+    // Place the dragged card into the original slot
     slot.innerHTML = '';
     slot.classList.remove('empty');
     slot.appendChild(card);
   }
-
-  // Allow reordering within rank list by dropping onto other cards
- rankList.addEventListener('dragover', e => {
-  e.preventDefault();
-  const targetCard = e.target.closest('.song-card');
-  if (!draggedCard || !targetCard) return;
-
-  const targetSlot = targetCard.parentElement;
-  if (!targetSlot.classList.contains('drop-slot')) return;
-
-  const rect = targetCard.getBoundingClientRect();
-  const offset = e.clientY - rect.top;
-
-  if (offset < rect.height / 2) {
-    targetSlot.insertBefore(draggedCard, targetCard);
-  } else {
-    targetSlot.appendChild(draggedCard);
-  }
-});
 
   // Shortlist accepts drops only from rank (to "return" songs)
   shortlistEl.addEventListener('dragover', e => {
@@ -349,6 +360,26 @@
     }
 
     shortlistEl.appendChild(draggedCard);
+  });
+
+  rankList.addEventListener('drop', e => {
+    e.preventDefault();
+    if (!draggedCard) return;
+
+    const card = e.target.closest('.song-card');
+    const slot = e.target.closest('.drop-slot');
+
+    // If dropped on a card, treat it as dropping on that card's slot
+    if (card) {
+      const parentSlot = card.parentElement;
+      placeCardInSlot(draggedCard, parentSlot);
+      return;
+    }
+
+    // If dropped on an empty slot
+    if (slot) {
+      placeCardInSlot(draggedCard, slot);
+    }
   });
 
   async function loadShortlist() {
