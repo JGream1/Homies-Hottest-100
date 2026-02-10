@@ -211,7 +211,6 @@
 </div>
 
 <script>
-  // Ensure uniqueID exists
   if (!localStorage.getItem('uniqueID')) {
     localStorage.setItem('uniqueID', crypto.randomUUID());
   }
@@ -222,10 +221,9 @@
   const submitBtn = document.getElementById('submitBtn');
 
   let draggedCard = null;
-  let draggedFrom = null; // 'shortlist' or 'rank'
+  let draggedFrom = null;
   let rankState = Array(50).fill(null);
 
-  // Create 1–50 slots
   function buildRankSlots() {
     for (let i = 1; i <= 50; i++) {
       const row = document.createElement('div');
@@ -239,9 +237,7 @@
       slot.className = 'drop-slot empty';
       slot.dataset.index = i - 1;
 
-      slot.addEventListener('dragover', e => {
-        e.preventDefault();
-      });
+      slot.addEventListener('dragover', e => e.preventDefault());
 
       slot.addEventListener('drop', e => {
         e.preventDefault();
@@ -285,13 +281,13 @@
     card.appendChild(img);
     card.appendChild(textWrap);
 
-    card.addEventListener('dragstart', e => {
+    card.addEventListener('dragstart', () => {
       draggedCard = card;
       draggedFrom = card.parentElement.id === 'shortlist' ? 'shortlist' : 'rank';
       card.classList.add('dragging');
     });
 
-    card.addEventListener('dragend', e => {
+    card.addEventListener('dragend', () => {
       card.classList.remove('dragging');
       draggedCard = null;
       draggedFrom = null;
@@ -300,25 +296,34 @@
     return card;
   }
 
+  function swapRankPositions(cardA, cardB) {
+    const indexA = parseInt(cardA.parentElement.dataset.index, 10);
+    const indexB = parseInt(cardB.parentElement.dataset.index, 10);
+
+    const temp = rankState[indexA];
+    rankState[indexA] = rankState[indexB];
+    rankState[indexB] = temp;
+
+    renderRankList();
+  }
+
   function placeCardInSlot(card, slot) {
     const index = parseInt(slot.dataset.index, 10);
     const slots = Array.from(rankList.querySelectorAll('.drop-slot'));
 
-    // Extract card data
     let songData = {
       song: card.dataset.song,
       artist: card.dataset.artist,
       image_url: card.dataset.imageUrl
     };
 
-    // Remove card from its old position in rankState
     const oldIndex = rankState.findIndex(x =>
       x && x.song === songData.song && x.artist === songData.artist
     );
     if (oldIndex !== -1) rankState[oldIndex] = null;
 
     if (draggedFrom === 'shortlist') {
-      card.remove();  // remove from shortlist immediately
+      card.remove();
     }
 
     let current = index;
@@ -330,16 +335,13 @@
       }
 
       if (current === 49) {
-        const bottom = rankState[49];
-        rankState[49] = songData;
-
         const bottomCard = slots[49].querySelector('.song-card');
         if (bottomCard) shortlistEl.appendChild(bottomCard);
 
+        rankState[49] = songData;
         break;
       }
 
-      // Remove the occupying card from the DOM immediately
       const occupyingCard = slots[current].querySelector('.song-card');
       if (occupyingCard) occupyingCard.remove();
 
@@ -369,16 +371,12 @@
     }
   }
 
-  // Shortlist accepts drops only from rank (to "return" songs)
-  shortlistEl.addEventListener('dragover', e => {
-    e.preventDefault();
-  });
+  shortlistEl.addEventListener('dragover', e => e.preventDefault());
 
   shortlistEl.addEventListener('drop', e => {
     e.preventDefault();
     if (!draggedCard) return;
 
-    // If dragged from rank, free up that slot
     if (draggedFrom === 'rank') {
       const parentSlot = draggedCard.parentElement;
       if (parentSlot.classList.contains('drop-slot')) {
@@ -399,14 +397,11 @@
     const card = e.target.closest('.song-card');
     const slot = e.target.closest('.drop-slot');
 
-    // If dropped on a card, treat it as dropping on that card's slot
-    if (card) {
-      const parentSlot = card.parentElement;
-      placeCardInSlot(draggedCard, parentSlot);
+    if (card && draggedFrom === 'rank') {
+      swapRankPositions(draggedCard, card);
       return;
     }
 
-    // If dropped on an empty slot
     if (slot) {
       placeCardInSlot(draggedCard, slot);
     }
