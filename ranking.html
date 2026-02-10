@@ -223,6 +223,7 @@
 
   let draggedCard = null;
   let draggedFrom = null; // 'shortlist' or 'rank'
+  let rankState = Array(50).fill(null);
 
   // Create 1–50 slots
   function buildRankSlots() {
@@ -301,44 +302,67 @@
 
   function placeCardInSlot(card, slot) {
     const index = parseInt(slot.dataset.index, 10);
-
-    // Build an array of the current 50 slots
     const slots = Array.from(rankList.querySelectorAll('.drop-slot'));
 
-    // Find the first empty slot at or after the drop position
-    let target = index;
-    while (target < 50 && slots[target].querySelector('.song-card')) {
-      target++;
+    // Extract card data
+    const songData = {
+      song: card.dataset.song,
+      artist: card.dataset.artist,
+      image_url: card.dataset.imageUrl
+    };
+
+    // Remove card from its old position in rankState
+    const oldIndex = rankState.findIndex(x =>
+      x && x.song === songData.song && x.artist === songData.artist
+    );
+    if (oldIndex !== -1) rankState[oldIndex] = null;
+
+    if (draggedFrom === 'shortlist') {
+      card.remove();  // remove from shortlist immediately
     }
 
-    // If no empty slot exists, eject the bottom song to shortlist
-    if (target >= 50) {
-      const lastSlot = slots[49];
-      const bottomCard = lastSlot.querySelector('.song-card');
+    let current = index;
 
-      if (bottomCard) {
-        lastSlot.innerHTML = '';
-        lastSlot.classList.add('empty');
-        shortlistEl.appendChild(bottomCard);
+    while (true) {
+      if (rankState[current] === null) {
+        rankState[current] = songData;
+        break;
       }
 
-      target = 49; // treat slot 50 as the empty slot
-    }
+      if (current === 49) {
+        const bottom = rankState[49];
+        rankState[49] = songData;
 
-    // Shift songs down from bottom to target
-    for (let i = target; i > index; i--) {
-      const above = slots[i - 1].querySelector('.song-card');
-      if (above) {
-        slots[i].innerHTML = '';
-        slots[i].classList.remove('empty');
-        slots[i].appendChild(above);
+        const bottomCard = slots[49].querySelector('.song-card');
+        if (bottomCard) shortlistEl.appendChild(bottomCard);
+
+        break;
       }
+
+      const temp = rankState[current];
+      rankState[current] = songData;
+      songData = temp;
+      current++;
     }
 
-    // Place the dragged card into the original slot
-    slot.innerHTML = '';
-    slot.classList.remove('empty');
-    slot.appendChild(card);
+    renderRankList();
+  }
+
+  function renderRankList() {
+    const slots = Array.from(rankList.querySelectorAll('.drop-slot'));
+
+    for (let i = 0; i < 50; i++) {
+      const slot = slots[i];
+      slot.innerHTML = '';
+
+      if (rankState[i] === null) {
+        slot.classList.add('empty');
+        continue;
+      }
+
+      slot.classList.remove('empty');
+      slot.appendChild(createSongCard(rankState[i]));
+    }
   }
 
   // Shortlist accepts drops only from rank (to "return" songs)
@@ -354,6 +378,8 @@
     if (draggedFrom === 'rank') {
       const parentSlot = draggedCard.parentElement;
       if (parentSlot.classList.contains('drop-slot')) {
+        const idx = parseInt(parentSlot.dataset.index, 10);
+        rankState[idx] = null;
         parentSlot.innerHTML = '';
         parentSlot.classList.add('empty');
       }
@@ -399,20 +425,11 @@
       return;
     }
 
-    const ranked = [];
-    const slots = rankList.querySelectorAll('.drop-slot');
-    slots.forEach(slot => {
-      const card = slot.querySelector('.song-card');
-      if (card) {
-        ranked.push({
-          song: card.dataset.song,
-          artist: card.dataset.artist,
-          image_url: card.dataset.imageUrl
-        });
-      } else {
-        ranked.push(null);
-      }
-    });
+    const ranked = rankState.map(entry => entry ? {
+      song: entry.song,
+      artist: entry.artist,
+      image_url: entry.image_url
+    } : null);
 
     const response = await fetch('https://homies-hottest-100.onrender.com/submit_top50', {
       method: 'POST',
