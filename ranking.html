@@ -305,7 +305,7 @@
     const slots = Array.from(rankList.querySelectorAll('.drop-slot'));
 
     // Extract card data
-    const songData = {
+    let songData = {
       song: card.dataset.song,
       artist: card.dataset.artist,
       image_url: card.dataset.imageUrl
@@ -338,6 +338,10 @@
 
         break;
       }
+
+      // Remove the occupying card from the DOM immediately
+      const occupyingCard = slots[current].querySelector('.song-card');
+      if (occupyingCard) occupyingCard.remove();
 
       const temp = rankState[current];
       rankState[current] = songData;
