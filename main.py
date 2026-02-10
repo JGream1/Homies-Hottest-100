@@ -107,10 +107,32 @@ def get_submissions(db: Session = Depends(get_db)):
     return result
 
 
-# Reset submissions data
+# Reset submissions DBs
 @app.post('/reset')
 def reset(db: Session = Depends(get_db)):
     db.query(SubmissionRow).delete()
+    db.query(CleanedSong).delete()
+    db.commit()
+    return {"status": "reset_complete"}
+
+
+# Reset top 50 list DB
+@app.post('/reset_top50')
+def reset_top50(db: Session = Depends(get_db)):
+    db.query(Top50Row).delete()
+    db.commit()
+    return {"status": "top50_reset_complete"}
+
+
+# Reset submissions data
+@app.post('/reset')
+def reset(db: Session = Depends(get_db)):
+    # Clear old shortlist submissions
+    db.query(SubmissionRow).delete()
+
+    # Clear cleaned shortlist songs
+    db.query(CleanedSong).delete()
+
     db.commit()
     return {"status": "reset_complete"}
 
