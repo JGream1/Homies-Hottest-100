@@ -1,8 +1,7 @@
+from db import SessionLocal, CleanedSong
 import requests
 import re
 import pandas as pd
-import os
-from db import SessionLocal, CleanedSong
 
 
 ##### CLEAN SONGS FROM SUBMISSIONS #####

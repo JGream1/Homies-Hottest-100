@@ -312,23 +312,23 @@
   }
 
   // Allow reordering within rank list by dropping onto other cards
-  rankList.addEventListener('dragover', e => {
-    e.preventDefault();
-    const targetCard = e.target.closest('.song-card');
-    if (!draggedCard || !targetCard) return;
+ rankList.addEventListener('dragover', e => {
+  e.preventDefault();
+  const targetCard = e.target.closest('.song-card');
+  if (!draggedCard || !targetCard) return;
 
-    const targetSlot = targetCard.parentElement;
-    if (!targetSlot.classList.contains('drop-slot')) return;
+  const targetSlot = targetCard.parentElement;
+  if (!targetSlot.classList.contains('drop-slot')) return;
 
-    const rect = targetCard.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
+  const rect = targetCard.getBoundingClientRect();
+  const offset = e.clientY - rect.top;
 
-    if (offset < rect.height / 2) {
-      targetSlot.parentElement.before(draggedCard.parentElement.parentElement || draggedCard.parentElement);
-    } else {
-      targetSlot.parentElement.after(draggedCard.parentElement.parentElement || draggedCard.parentElement);
-    }
-  });
+  if (offset < rect.height / 2) {
+    targetSlot.insertBefore(draggedCard, targetCard);
+  } else {
+    targetSlot.appendChild(draggedCard);
+  }
+});
 
   // Shortlist accepts drops only from rank (to "return" songs)
   shortlistEl.addEventListener('dragover', e => {
