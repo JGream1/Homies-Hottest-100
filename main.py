@@ -52,6 +52,20 @@ def submit(payload: dict, db: Session = Depends(get_db)):
     name = payload['name']
     unique_id = payload['uniqueID']
 
+    # Check if this person/device already submitted
+    existing = (
+        db.query(SubmissionRow)
+          .filter(
+              (SubmissionRow.homie == name) |
+              (SubmissionRow.unique_id == unique_id)
+          )
+          .first()
+    )
+
+    if existing:
+        return {"error": "already_submitted"}
+
+    # Save rows
     for row in payload['rows']:
         song, artist, notes = (row + ['', '', ''])[:3]
         if not any(x.strip() for x in [song, artist, notes]):
@@ -95,6 +109,7 @@ def get_submissions(db: Session = Depends(get_db)):
 
 # Reset submissions data
 @app.post('/reset')
-def reset():
-    open('submissions.json', 'w').close()
-    return {'status': 'reset_complete'}
+def reset(db: Session = Depends(get_db)):
+    db.query(SubmissionRow).delete()
+    db.commit()
+    return {"status": "reset_complete"}
