@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import json
 import os
-from db import init_db, SessionLocal, SubmissionRow
+from db import init_db, SessionLocal, SubmissionRow, CleanedSong, Top50Row
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
 
@@ -113,3 +113,56 @@ def reset(db: Session = Depends(get_db)):
     db.query(SubmissionRow).delete()
     db.commit()
     return {"status": "reset_complete"}
+
+
+# Return list of cleaned song dicts from DB
+@app.get('/cleaned_songs')
+def cleaned_songs(db: Session = Depends(get_db)):
+    rows = db.query(CleanedSong).all()
+    return [
+        {
+            "song": r.song,
+            "artist": r.artist,
+            "notes": r.notes,
+            "image_url": r.image_url
+        }
+        for r in rows
+    ]
+
+
+# Add homie's top 50 lists to DB
+@app.post('/submit_top50')
+def submit_top50(payload: dict, db: Session = Depends(get_db)):
+    name = payload['name']
+    unique_id = payload['uniqueID']
+    ranked = payload['ranked']  # list of 50 items (or nulls)
+
+    # Prevent duplicate submissions
+    existing = (
+        db.query(Top50Row)
+          .filter(
+              (Top50Row.homie == name) |
+              (Top50Row.unique_id == unique_id)
+          )
+          .first()
+    )
+    if existing:
+        return {"error": "already_submitted"}
+
+    # Save each ranking row
+    for index, item in enumerate(ranked, start=1):
+        if item is None:
+            continue
+
+        db_row = Top50Row(
+            homie=name,
+            unique_id=unique_id,
+            rank=index,
+            song=item['song'],
+            artist=item['artist'],
+            image_url=item['image_url']
+        )
+        db.add(db_row)
+
+    db.commit()
+    return {"status": "ok"}

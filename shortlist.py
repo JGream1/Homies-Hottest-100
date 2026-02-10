@@ -2,6 +2,7 @@ import requests
 import re
 import pandas as pd
 import os
+from db import SessionLocal, CleanedSong
 
 
 ##### CLEAN SONGS FROM SUBMISSIONS #####
@@ -15,8 +16,7 @@ def clean_text(s):
         return ''
     
     s = s.upper()
-    s = s.replace('-', ' ')
-    s = re.sub(r'[^\w\s]', '', s)
+    s = re.sub(r'[^\w\s-]', '', s)
     s = re.sub(r'\s+', ' ', s)
 
     return s.strip()
@@ -45,36 +45,19 @@ final = (
     df.sort_values(['Artist', 'Song', 'Homie'])
       .groupby(['Song', 'Artist'], as_index=False)
       .agg({
-          'Song': 'first',          # original text
+          'Song': 'first',
           'Artist': 'first',
           'Notes': 'first',
           'Homie': lambda x: ', '.join(sorted(set(x)))
       })
 )
 
-print(final)
-
 
 ##### GET COVER ART FOR EACH SONG #####
 
-covers_dir = 'covers'
-os.makedirs(covers_dir, exist_ok=True)
-
-# Download image from url to path
-def download_image(url, path):
-    r = requests.get(url, stream=True)
-    r.raise_for_status()
-    with open(path, 'wb') as f:
-        for chunk in r.iter_content(8192):
-            f.write(chunk)
-
-# Return safe file path name
-def safe_filename(s):
-    return "".join(c for c in s if c.isalnum() or c in (" ", "-", "_")).rstrip()
-
 # Search iTunes for cover art
-def search_itunes(song, artist, notes):
-    query = f'{song} {artist} {notes}'
+def search_itunes(song, artist):
+    query = f'{song} {artist}'
     url = 'https://itunes.apple.com/search'
     params = {
         'term': query,
@@ -95,19 +78,19 @@ def search_itunes(song, artist, notes):
     
     return artwork.replace('100x100bb.jpg', '600x600bb.jpg')
 
-# Return file path for cover art image
-def get_cover_for_row(row):
-    image_url = search_itunes(song, artist, notes)
+# Add cleaned submission data and image url to cleaned song DB
+session = SessionLocal()
+session.query(CleanedSong).delete()
 
-    if not image_url:
-        return None
-    
-    filename = safe_filename(f'{row['Artist']} - {row['Song']}.jpg')
-    path = os.path.join(covers_dir, filename)
-    download_image(image_url, path)
+for _, row in final.iterrows():
+    image_url = search_itunes(row['Song'], row['Artist'])
+    cleaned = CleanedSong(
+        song=row['Song'],
+        artist=row['Artist'],
+        notes=row['Notes'],
+        image_url=image_url
+    )
+    session.add(cleaned)
 
-    return path
-
-# Add cover art path for each song
-final['ImagePath'] = final.apply(get_cover_for_row, axis=1)
-print(final)
+session.commit()
+session.close()
