@@ -1,61 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Homie's Hottest 100</title>
 
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #ffffff;
+      background: linear-gradient(135deg, #ffecd2, #fcb69f);
       display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    header {
-      width: 100%;
-      background: #ff4a4a; /* same red tone */
-      padding: 25px 0;
-      text-align: center;
-      color: white;
-      font-size: 2rem;
-      font-weight: bold;
+      justify-content: center;
+      padding-top: 60px;
+      margin: 0;
     }
 
     .container {
-      margin-top: 60px;
-      display: flex;
-      flex-direction: column;
-      gap: 25px;
-      align-items: center;
+      background: white;
+      padding: 40px;
+      border-radius: 14px;
+      width: 500px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
 
-    a.button {
-      background: #ff4a4a;
+    h1 {
+      color: #e65100;
+      margin-bottom: 30px;
+      font-size: 2rem;
+    }
+
+    .btn {
+      display: block;
+      width: 70%;
+      margin: 15px auto;
+      padding: 14px 20px;
+      background: #ff7043;
       color: white;
-      padding: 15px 35px;
-      border-radius: 10px;
       text-decoration: none;
-      font-size: 1.3rem;
+      font-size: 18px;
+      border-radius: 10px;
       transition: background 0.2s;
     }
 
-    a.button:hover {
-      background: #e63a3a;
+    .btn:hover {
+      background: #e64a19;
     }
   </style>
 </head>
 
 <body>
 
-  <header>Homie's Hottest 100</header>
-
   <div class="container">
-    <a class="button" href="ranking.html">Ranking Page</a>
-    <a class="button" href="shortlist.html">Shortlist Page</a>
+    <h1>Homie's Hottest 100</h1>
+
+    <a class="btn" href="ranking.html">Ranking Page</a>
+    <a class="btn" href="shortlist.html">Shortlist Page</a>
   </div>
 
 </body>
