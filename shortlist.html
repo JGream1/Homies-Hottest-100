@@ -192,6 +192,16 @@
       [...r.cells].slice(0, 3).map(c => c.firstChild.value)
     );
 
+    // Block submission if *every* cell in *every* row is empty after trimming
+    const hasAnyValue = rows.some(
+      cols => cols.some(val => val.trim() !== "")
+    );
+
+    if (!hasAnyValue) {
+      alert("Why would you submit nothing? Stop being such a sub and pick some songs");
+      return;
+    }
+
     const response = await fetch('https://homies-hottest-100.onrender.com/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
