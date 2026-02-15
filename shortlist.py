@@ -33,9 +33,10 @@ for sub in data['submissions']:
                 'Homie': homie
             })
 
-# Normalise to find duplicates
 df = pd.DataFrame(records)
 print(df)
+
+# Normalise to find duplicates
 df['Song'] = df['Song'].apply(clean_text)
 df['Artist'] = df['Artist'].apply(clean_text)
 df['Notes'] = df['Notes'].apply(clean_text)
@@ -43,14 +44,17 @@ df = df[df['Song'].str.strip() != '']
 
 final = (
     df.sort_values(['Artist', 'Song', 'Homie'])
-      .groupby(['Song', 'Artist'], as_index=False)
+      .groupby(['Song', 'Artist'], as_index=False, sort=False)
       .agg({
           'Song': 'first',
           'Artist': 'first',
           'Notes': 'first',
           'Homie': lambda x: ', '.join(sorted(set(x)))
       })
+      .sort_values(['Artist', 'Song'])   # <-- final stable sort
+      .reset_index(drop=True)
 )
+print(final)
 
 
 ##### GET COVER ART FOR EACH SONG #####
@@ -66,7 +70,24 @@ def search_itunes(song, artist):
     }
     
     r = requests.get(url, params=params)
-    data = r.json()
+
+    print("STATUS:", r.status_code)
+    print("RAW RESPONSE:", r.text[:300])
+
+    # Raise error if returned
+    try:
+        r.raise_for_status()
+    except Exception as e:
+        print("HTTP error:", e)
+        return None
+
+    # Try JSON
+    try:
+        data = r.json()
+    except ValueError:
+        print("Non-JSON response:")
+        print(r.text[:500])
+        return None
 
     results = data.get('results', [])
     if not results:
