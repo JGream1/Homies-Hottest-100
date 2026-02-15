@@ -35,6 +35,7 @@ for sub in data['submissions']:
 
 # Normalise to find duplicates
 df = pd.DataFrame(records)
+print(df)
 df['Song'] = df['Song'].apply(clean_text)
 df['Artist'] = df['Artist'].apply(clean_text)
 df['Notes'] = df['Notes'].apply(clean_text)

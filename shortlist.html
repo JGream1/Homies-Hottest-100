@@ -93,7 +93,7 @@
 
 <body>
   
-<a href="index.html" class="home-btn">🏠 Home</a>
+<a href="index.html" class="home-btn">Home</a>
 
 <style>
   .home-btn {
@@ -209,6 +209,37 @@
   };
 
   addRow();
+</script>
+
+<script>
+  let pingInterval = null;
+
+  function startPinging() {
+    if (pingInterval) return;
+
+    pingInterval = setInterval(() => {
+      fetch("https://homies-hottest-100.onrender.com/ping")
+        .catch(() => {});
+    }, 5 * 60 * 1000); // every 5 minutes
+  }
+
+  function stopPinging() {
+    if (pingInterval) {
+      clearInterval(pingInterval);
+      pingInterval = null;
+    }
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      startPinging();
+    } else {
+      stopPinging();
+    }
+  });
+
+  window.addEventListener("load", startPinging);
+  window.addEventListener("beforeunload", stopPinging);
 </script>
 
 </body>

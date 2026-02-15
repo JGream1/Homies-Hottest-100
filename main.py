@@ -188,3 +188,9 @@ def submit_top50(payload: dict, db: Session = Depends(get_db)):
 
     db.commit()
     return {"status": "ok"}
+
+
+# Keep Render backend awake
+@app.get("/ping")
+def ping():
+    return {"status": "ok"}
