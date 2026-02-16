@@ -190,6 +190,35 @@ def submit_top50(payload: dict, db: Session = Depends(get_db)):
     return {"status": "ok"}
 
 
+# Return list of top 50 ranked songs from DB
+@app.get('/top50_submissions')
+def get_top50_submissions(db: Session = Depends(get_db)):
+    rows = db.query(Top50Row).all()
+
+    grouped = {}
+    for r in rows:
+        key = (r.homie, r.unique_id)
+        grouped.setdefault(key, []).append({
+            "rank": r.rank,
+            "song": r.song,
+            "artist": r.artist,
+            "image_url": r.image_url
+        })
+
+    result = {
+        "submissions": [
+            {
+                "name": homie,
+                "uniqueID": uid,
+                "ranked": sorted(items, key=lambda x: x["rank"])
+            }
+            for (homie, uid), items in grouped.items()
+        ]
+    }
+
+    return result
+
+
 # Keep Render backend awake
 @app.get("/ping")
 def ping():
